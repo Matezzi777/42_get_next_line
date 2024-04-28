@@ -10,11 +10,37 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-// #include "get_next_line.h"
-#include <stdio.h>
+#include "get_next_line.h"
+// #include <stdio.h>
 
 char	*get_next_line(int fd);
+char	*read_file(int fd, char *res);
+char	*ft_line(char *buffer);
+char	*ft_next(char *buffer);
+char	*ft_free(char *buffer, char *buf);
 
+char	*read_file(int fd, char *res)
+{
+
+}
+
+char	*ft_line(char *buffer)
+{
+	
+}
+
+char	*ft_next(char *buffer)
+{
+
+}
+
+
+char	*ft_free(char *buffer, char *buf)
+{
+
+}
+
+//Fonction principale
 char	*get_next_line(int fd)
 {
 	static char	*buffer;
@@ -28,14 +54,4 @@ char	*get_next_line(int fd)
 	line = ft_line(buffer);
 	buffer = ft_next(buffer);
 	return (line);
-}
-
-int	main(void)
-{
-	// printf("Test :\n");
-	// if (BUFFER_SIZE > 0)
-	// 	printf("BUFFER_SIZE = %d", BUFFER_SIZE);
-	// else
-	// 	printf("BUFFER_SIZE = %d\nINVALID BUFFER SIZE", BUFFER_SIZE);
-	return (0);
 }
