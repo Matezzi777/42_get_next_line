@@ -13,74 +13,37 @@
 #include "get_next_line.h"
 
 char	*get_next_line(int fd); //Fonction principale
-char	*read_line(int fd, char *buffer, int buffer_length); //Récupère la ligne
-char	*clean_line(char *line); //Nettoie la ligne
-int		check_new_line(char *buffer); //Vérifie si la fin de la ligne est atteinte
+char	*get_dirty_line(int fd, char *dirty_line);
 
 //Fonction principale
 char	*get_next_line(int fd)
 {
-	static char	*buffer;
+	static char	*dirty_line;
 	char	*line;
-	int		buffer_length;
+	ssize_t	read_value;
+
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0) //Retourne NULL en cas d'erreurs
+		return (NULL);
+	dirty_line = get_dirty_line(fd, dirty_line); //Lis le fd par bloc de BUFFER_SIZE jusqu'au bloc contenant \n ou \0
+	if (!dirty_line) //Retourne NULL en cas d'erreur de récupération de la ligne
+		return (NULL);
+	line = clean_line(dirty_line); //Nettoie la ligne récupérée
+	dirty_line = start_next_line(dirty_line); //Prépare la ligne pour le prochain appel
+	return (line); //Retourne la ligne nettoyée
 	
-	if (!BUFFER_SIZE)
-		buffer_length = 5;
-	else
-		buffer_length = BUFFER_SIZE;
-	buffer = (char *)malloc((buffer_length + 1) * sizeof(char));
-	if (!buffer)
-		return(NULL);
-	line = read_line(fd, buffer, buffer_length); //Récupère la ligne
-	free(buffer);
-	return (line);
 }
 
-//Récupère la ligne
-char	*read_line(int fd, char *buffer, int buffer_length)
+char	*get_dirty_line(int fd, char *dirty_line)
 {
+	char	*buffer;
 	char	*line;
-	ssize_t	bytes_read;
-	int		new_line;
+	
+	line = (char *)malloc((BUFFER_SIZE + 1)* sizeof)
 
-	line = ""; //Initialise la ligne
-	while (1)
-	{
-		bytes_read = read(fd, buffer, buffer_length); //Lis dans le fichier
-		buffer[buffer_length] = '\0';
-		if (bytes_read == -1) //Si erreur de lecture
-			return (NULL); //Retourne l'erreur
-		else //Si lecture réussie
-		{
-			new_line = check_new_line(buffer);
-			line = ft_strjoin(line, buffer); //Ajoute le contenu du buffer à la suite de la ligne
-			if (bytes_read < buffer_length || new_line == 1) //Si le buffer n'est pas rempli ou que la fin de la ligne est atteint
-				return (line);
-				// return (clean_line(line)); //Nettoie la ligne et la retourne.
-		}
-	}
 }
 
-//Nettoie la ligne
-// char	*clean_line(char *line);
-// {
 
-// }
 
-//Vérifie si la fin de la ligne est atteinte
-int		check_new_line(char *buffer)
-{
-	int	i;
-
-	i = 0;
-	while (buffer[i])
-	{
-		if (buffer[i] == '\n')
-			return (1);
-		i++;
-	}
-	return (0);
-}
 
 //MAIN
 int	main(void)
