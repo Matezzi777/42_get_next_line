@@ -36,12 +36,27 @@ char	*get_next_line(int fd)
 char	*get_dirty_line(int fd, char *dirty_line)
 {
 	char	*buffer;
-	char	*line;
+	ssize_t	bytes_read;
 	
-	line = (char *)malloc((BUFFER_SIZE + 1)* sizeof)
-
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!dirty_line)
+	{
+		dirty_line = (char *)malloc(1 * sizeof(char));
+		dirty_line[0] = '\0';
+	}
+	while(1)
+	{
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == -1)
+			return (NULL);
+		dirty_line = clean_join(dirty_line, buffer);
+		if (is_eol(buffer))
+			return (dirty_line);
+	}
 }
 
+//is_eol()
+//clean_join()
 
 
 
