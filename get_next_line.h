@@ -8,6 +8,7 @@
 # include <unistd.h> //read() & write()
 # include <stdlib.h> //malloc() & free()
 # include <stddef.h>
+# include <stdbool.h>
 // # include <sys/types.h>
 // # include <sys/uio.h>
 
@@ -18,5 +19,6 @@ char	*read_line(int fd, char *buffer, int buffer_length);
 // get_next_line_utils.c
 size_t	ft_strlen(const char *str);
 char	*ft_strjoin(char const *s1, char const *s2);
+char	*clean_join(char *s1, char *s2);
 
 #endif

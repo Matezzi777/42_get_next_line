@@ -51,15 +51,17 @@ char	*get_dirty_line(int fd, char *dirty_line)
 			return (NULL);
 		dirty_line = clean_join(dirty_line, buffer);
 		if (is_eol(buffer))
+		{
+			free(buffer);
 			return (dirty_line);
+		}
 	}
 }
 
-//is_eol()
 //clean_join()
 
 
-
+/*
 //MAIN
 int	main(void)
 {
@@ -69,3 +71,4 @@ int	main(void)
 	printf("%s\n", get_next_line(fd));
 	return (0);
 }
+*/

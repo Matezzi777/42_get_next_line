@@ -14,6 +14,8 @@
 
 size_t	ft_strlen(const char *str);
 char	*ft_strjoin(char const *s1, char const *s2);
+bool	is_eol(char *str);
+char	*clean_join(char *s1, char *s2);
 
 size_t	ft_strlen(const char *str)
 {
@@ -25,6 +27,7 @@ size_t	ft_strlen(const char *str)
 	return (i);
 }
 
+// Join 2 chaînes de caractères
 char	*ft_strjoin(char const *s1, char const *s2)
 {
 	int		len_s1;
@@ -50,4 +53,44 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	}
 	str[i] = '\0';
 	return (str);
+}
+
+// Renvoie 1 si la chaîne contient \n, renvoie 0 sinon
+bool	is_eol(char *str)
+{
+	int	i;
+
+	i = 0;
+	while(str[i])
+	{
+		if (str[i] == '\n')
+			return (1);
+	}
+	return (0);
+}
+
+// ft_strjoin adapté pour free les chaînes initiales
+char	*clean_join(char *s1, char *s2)
+{
+	int		i;
+	int		len_s1;
+	int		len_s2;
+	char	*result;
+
+	len_s1 = ft_strlen(s1);
+	len_s2 = ft_strlen(s2);
+	result = (char *)malloc((len_s1 + len_s2 + 1) * sizeof(char));
+	i = 0;
+	while (i < (len_s1 + len_s2))
+	{
+		if (i < len_s1)
+			result[i] = s1[i];
+		else
+			result[i] = s2[i - len_s1];
+		i++;
+	}
+	result[i] = '\0';
+	free(s1);
+	free(s2);
+	return (result);
 }
