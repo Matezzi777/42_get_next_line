@@ -6,7 +6,7 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:26:00 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/04/28 21:54:46 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/04/30 08:51:33 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,10 +99,7 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
 		return (NULL);
-	buffer = read_file(fd, buffer);
-	if (!buffer)
-		return (NULL);
-	line = ft_line(buffer);
-	buffer = ft_next(buffer);
-	return (line);
+	buffer[fd] = init_buffer(fd, buffer[fd]); //Initialise le buffer s'il n'existe pas
+	line = get_line(fd, buffer);
+	
 }
