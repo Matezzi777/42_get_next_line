@@ -6,100 +6,77 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:26:00 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/04/30 08:51:33 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/04/30 11:38:34 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_free(char *buffer, char *buf)
-{
-	char	*temp;
 
-	temp = ft_strjoin(buffer, buf);
-	free(buffer);
-	return (temp);
-}
-
-char	*ft_next(char *buffer)
-{
-	int		i;
-	int		j;
-	char	*line;
-
-	i = 0;
-	while (buffer[i] && buffer[i] != '\n')
-		i++;
-	if (!buffer[i])
-	{
-		free(buffer);
-		return (NULL);
-	}
-	line = ft_calloc((ft_strlen(buffer) -i + 1), sizeof(char));
-	i++;
-	j = 0;
-	while (buffer[i])
-		line[j++] = buffer[i++];
-	free(buffer);
-	return (line);
-}
-
-char	*ft_line(char *buffer)
-{
-	char	*line;
-	int		i;
-
-	i = 0;
-	if (!buffer[i])
-		return (NULL);
-	while (buffer[i] && buffer[i] != '\n')
-		i++;
-	line = ft_calloc(i + 2, sizeof(char));
-	i = 0;
-	while (buffer[i] && buffer[i] != '\n')
-	{
-		line[i] = buffer[i];
-		i++;
-	}
-	if (buffer[i] && buffer[i] == '\n')
-		line[i++] = '\n';
-	return (line);
-}
-
-char	*read_file(int fd, char *res)
-{
-	char	*buffer;
-	int		byte_read;
-
-	if (!res)
-		res = ft_calloc(1, 1);
-	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
-	byte_read = 1;
-	while (1)
-	{
-		byte_read = read(fd, buffer, BUFFER_SIZE);
-		if (byte_read == -1)
-		{
-			free(buffer);
-			return (NULL);
-		}
-		buffer[byte_read] = '\0';
-		res = ft_free(res, buffer);
-		if (ft_strchr(buffer, '\n') || byte_read == 0)
-			break ;
-	}
-	free(buffer);
-	return (res);
-}
-
+/*
+	Fonction principale
+*/
 char	*get_next_line(int fd)
 {
-	static char	*buffer;
-	char		*line;
+	static t_list	*stash = NULL;
+	char			*line;
+	int				readed;
 
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
+	if (fd < 0 || BUFFER_SIZE < 1 || read(fd, NULL, 0) < 0)
 		return (NULL);
-	buffer[fd] = init_buffer(fd, buffer[fd]); //Initialise le buffer s'il n'existe pas
-	line = get_line(fd, buffer);
+	line = NULL;
+	readed = 1;
+	read_and_stash(fd, &stash, &readed);
+	if (stash == NULL)
+		return (NULL);
+	return (line);
+}
+
+/*
+	Uses read() to add characters to the stash
+*/
+void	read_and_stash(int fd, t_list **stash, int *readed)
+{
+	char	*buffer;
+
+	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!buffer)
+		return ;
+	while (!found_newline(*stash) && *readed != 0)
+	{
+		*readed = read(fd, buffer, BUFFER_SIZE);
+		if ((*stash == NULL && *readed == 0) || (readed == -1))
+		{
+			free(buffer);
+			return ;
+		}
+		buffer[*readed] = '\0';
+	}
+}
+
+/*
+	Adds the content of our buffer to the end of our stash
+*/
+void	add_to_stash()
+{
+	
+}
+
+/*
+	Extracts all character from our stash and stores them in out line.
+	Stopping after the first \n it encounters
+*/
+void	extract_line()
+{
+	
+}
+
+/*
+	After extracting the line that was read, we don't need those characters anymore.
+	This function clears the stash so only the characters that have to not been returned at
+	the end of get_next_line() remain in our static stash.
+*/
+void	clean_stash()
+{
 	
 }

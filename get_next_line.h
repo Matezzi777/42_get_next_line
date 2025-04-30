@@ -6,27 +6,37 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:26:07 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/04/28 21:44:12 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/04/30 11:58:55 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef GET_NEXT_LINE_H
 # define GET_NEXT_LINE_H
 
+# include <stdlib.h> //malloc(), free()
+# include <unistd.h> //read()
+
 # ifndef BUFFER_SIZE
-#  define BUFFER_SIZE 10
+#  define BUFFER_SIZE 5
 # endif
 
-# include <unistd.h> //read()
-# include <stdlib.h> //malloc()
+typedef struct s_list
+{
+	char			*content;
+	struct s_list	*next;
+}				t_list;
 
 //get_next_line.c
 char	*get_next_line(int fd);
+void	read_and_stash(int fd, t_list **stash, int *readed);
+void	add_to_stash();
+void	extract_line();
+void	clean_stash();
 //get_next_line_utils.c
-char	*ft_strjoin(const char *s1, const char *s2);
-char	*ft_strchr(const char *string, int searchedChar);
-void	ft_bzero(void *s, size_t n);
-void	*ft_calloc(size_t elementCount, size_t elementSize);
-size_t	ft_strlen(const char *theString);
+int		found_new_line(t_list **stash);
+t_list	*ft_lst_get_last(t_list **stash);
+void	generate_line();
+void	free_stash();
+
 
 #endif
