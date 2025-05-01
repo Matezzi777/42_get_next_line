@@ -6,7 +6,7 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:25:57 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/04/30 11:54:12 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/04/30 15:27:58 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,4 +61,28 @@ void	generate_line()
 void	free_stash()
 {
 
+}
+
+/*
+	Returns the total length of the line to create.
+*/
+int	get_line_length(t_list **stash)
+{
+	t_list	*node;
+	int		length;
+	int		i;
+
+	node = *stash;
+	length = 0;
+	while (node)
+	{
+		i = 0;
+		while (node->content[i])
+		{
+			length++;
+			i++;
+		}
+		node = node->next;
+	}
+	return (length);
 }
