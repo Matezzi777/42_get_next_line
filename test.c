@@ -6,7 +6,7 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 18:19:07 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/04/25 18:29:33 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/05/01 20:06:58 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ int	main(int argc, char **argv)
 
 	if (argc != 2)
 	{
-		printf("Wrong nb of arguments (1 needed).\n ==> Use : ./a.out <path_to_file>\n");
+		printf("Wrong nb of arguments (1 needed).\n ==> Use : "
+			"./a.out <path_to_file>\n");
 		return (0);
 	}
 	fd = open(argv[1], O_RDONLY);

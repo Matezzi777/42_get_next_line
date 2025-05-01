@@ -6,129 +6,133 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:26:00 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/04/30 15:35:13 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/05/01 20:06:00 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-
 
 /*
 	Fonction principale
 */
 char	*get_next_line(int fd)
 {
-	int				readed;
-	static t_list	*stash = NULL;
-	char			*line;
+	static char	*save[1024] = {NULL};
+	t_list		*list;
+	char		*line;
+	int			case_init;
 
-	if (fd < 0 || BUFFER_SIZE < 1 || read(fd, NULL, 0) < 0)
+	if (fd < 0 || fd >= 1024 || BUFFER_SIZE < 1 || read(fd, NULL, 0))
 		return (NULL);
-	line = NULL;
-	readed = 1;
-	read_and_stash(fd, &stash, &readed);
-	if (stash == NULL)
+	case_init = stash_to_list(save[fd], &list);
+	if (case_init == MALLOC_ERROR)
 		return (NULL);
-	line = extract_line(stash);
+	if (case_init == ALREADY_CONTAINED)
+		return (stash_to_string(save[fd]));
+	read_to_list(fd, &list);
+	line = list_to_string(&list);
+	save[fd] = list_to_stash(&list);
+	empty_list(&list);
 	return (line);
 }
 
 /*
-	Uses read() to add characters to the stash
+	Lis le fd et remplis la liste d'attente.
 */
-void	read_and_stash(int fd, t_list **stash, int *readed)
+void	read_to_list(int fd, t_list **list)
 {
-	char	*buffer;
-
-	buffer = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
-	if (!buffer)
-		return ;
-	while (!found_newline(*stash) && *readed != 0)
-	{
-		*readed = read(fd, buffer, BUFFER_SIZE);
-		if ((*stash == NULL && *readed == 0) || (readed == -1))
-		{
-			free(buffer);
-			return ;
-		}
-		buffer[*readed] = '\0';
-		add_to_stash(stash, buffer);
-	}
-}
-
-/*
-	Adds the content of our buffer to the end of our stash
-*/
-void	add_to_stash(t_list **stash, char *buffer)
-{
-	t_list	*last;
-	t_list	*node;
-
-	last = ft_lst_get_last(stash);
-	node = (t_list *)malloc(sizeof(t_list));
-	if (!node)
-		return ;
-	node->content = ft_strdup(buffer);
-	if (!node->content)
-	{
-		free(node);
-		return ;
-	}
-	last->next = node;
-	node->next = NULL;
-}
-
-/*
-	Extracts all character from our stash and stores them in out line.
-	Stopping after the first \n it encounters
-*/
-char	*extract_line(t_list **stash)
-{
-	int		bytes;
+	int		bytes_read;
+	char	buffer[BUFFER_SIZE + 1];
 	int		i;
-	t_list	*node;
-	char	*line;
 
-	line = (char *)malloc((get_line_length(stash) + 1) * sizeof(char));
-	if (!line)
-		return (NULL);
-	while (*stash)
+	while (TRUE)
 	{
-		i = 0;
-		while ((*stash)->content[i])
-		{
-			line[bytes] = (*stash)->content[i];
-			i++;
-			bytes++;
-		}
-		stash = (*stash)->next;
+		bytes_read = read(fd, buffer, BUFFER_SIZE);
+		if (bytes_read == 0)
+			return ;
+		if (!add_to_list(bytes_read, buffer, list))
+			return ;
+		if (bytes_read < BUFFER_SIZE)
+			return ;
+		i = -1;
+		while (++i < BUFFER_SIZE)
+			if (buffer[i] == '\n')
+				return ;
 	}
 }
 
 /*
-	After extracting the line that was read, we don't need those characters anymore.
-	This function clears the stash so only the characters that have to not been returned at
-	the end of get_next_line() remain in our static stash.
+	Convertit la ligne depuis le contenu de la liste d'attente et la retourne.
+	Si la liste d'attente est vide, ou qu'une erreur arrive retourne NULL.
 */
-void	clean_stash(t_list **stash)
+char	*list_to_string(t_list **list)
 {
-	t_list	*node;
-	t_list	*next_node;
-	int		len;
-	char	*save;
+	t_list	*cursor;
+	char	*line;
+	int		i;
 
-	node = *stash;
-	while (node->next)
+	if (!list || !*list)
+		return (NULL);
+	line = NULL;
+	cursor = *list;
+	while (cursor)
 	{
-		next_node = node->next;
-		free(node->content);
-		free(node);
-		node = next_node;
+		line = cat_and_free(line, cursor->content);
+		if (!line)
+			return (NULL);
+		cursor = cursor->next;
 	}
-	len = 0;
-	while (node->content[len] && node->content[len] != '\n')
-		len++;
-	len = BUFFER_SIZE - len;
-	if (len)
-		
+	return (clean_line(line));
+}
+
+/*
+	Retourne les caractères à mettre en réserve
+		pour le prochain appel à get_next_line().
+	Retourne NULL si rien à mettre en réserve.
+*/
+char	*list_to_stash(t_list **list)
+{
+	int		i;
+	int		j;
+	char	stash[BUFFER_SIZE];
+	t_list	*cursor;
+
+	if (!list || !*list)
+		return (NULL);
+	cursor = *list;
+	while (cursor->next)
+		cursor = cursor->next;
+	i = 0;
+	while (cursor->content[i] && cursor->content[i] != '\n')
+		i++;
+	if (!cursor->content[i])
+		return (NULL);
+	j = 0;
+	while (cursor->content[++i])
+		stash[j++] = cursor->content[i];
+	if (j == 0)
+		return (NULL);
+	stash[++j] = '\0';
+	return (stash);
+}
+
+/*
+	Libère la mémoire allouée pour la liste d'attente.
+*/
+void	empty_list(t_list **list)
+{
+	t_list	*cursor;
+	t_list	*next;
+
+	if (!list || !*list)
+		return ;
+	cursor = *list;
+	while (cursor)
+	{
+		if (cursor->content)
+			free(cursor->content);
+		next = cursor->next;
+		free(cursor);
+		cursor = next;
+	}
 }

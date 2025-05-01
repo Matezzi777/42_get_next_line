@@ -6,83 +6,71 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:25:57 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/04/30 15:27:58 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/05/01 20:02:58 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
 /*
-	Looks for a newline character in the giver linked list.
-		Returns the index of the '\n' character if found.
-		Returns 0 if not found.
+	Ajoute le bloc à la liste d'attente.
+	Renvoie 1 en cas de succès.
+	Renvoie 0 en cas d'erreur d'allocation.
 */
-int	found_newline(t_list **stash)
+int	add_to_list(int bytes_read, char *buffer, t_list **list)
 {
-	t_list	*last_node;
-	int	i;
+	int		i;
+	t_list	*node;
+	t_list	*cursor;
 
-	last_node = ft_lst_get_last(stash);
+	node = (t_list *)malloc(sizeof(t_list));
+	if (!node)
+		return (0);
+	node->content = (char *)malloc((bytes_read + 1) * sizeof(char));
+	if (!node->content)
+		return (0);
 	i = -1;
-	while (last_node->content[++i])
-		if (last_node->content[i] == '\n')
-			return (i);
-	return (0);
-
+	while (++i < bytes_read)
+		node->content[i] = buffer[i];
+	buffer[i] = '\0';
+	if (!*list)
+		*list = node;
+	else
+	{
+		cursor = *list;
+		while (cursor->next)
+			cursor = cursor->next;
+		cursor->next = node;
+	}
+	return (1);
 }
 
 /*
-	Returns a pointer to the last node in our stash.
+	Ajoute le contenu de la réserve au début de la liste d'attente.
+	Renvoie 1 si l'entièreté de la ligne suivante est déjà contenu dans la
+		réserve ou si une erreur se produit.
+	Renvoie 0 si tout se passe correctement.
 */
-t_list	*ft_lst_get_last(t_list **stash)
-{
-	t_list	*last;
-
-	if (!stash || !*stash)
-		return (NULL);
-	last = *stash;
-	while (last->next)
-		last = last->next;
-	return (last);
-}
-
-/*
-	Calculates the number of chars in the current line, including the trailing \n if there is one
-	and allocates memory accordingly.
-*/
-void	generate_line()
-{
-
-}
-
-/*
-	Frees the entire stash.
-*/
-void	free_stash()
-{
-
-}
-
-/*
-	Returns the total length of the line to create.
-*/
-int	get_line_length(t_list **stash)
+int	stash_to_list(char	*stash, t_list **list)
 {
 	t_list	*node;
-	int		length;
 	int		i;
 
-	node = *stash;
-	length = 0;
-	while (node)
+	if (!stash)
+		return (ALRIGHT);
+	node = (t_list *)malloc(sizeof(t_list));
+	if (!node)
+		return (MALLOC_ERROR);
+	node->content = (char *)malloc((BUFFER_SIZE + 1) * sizeof(char));
+	if (!node->content)
 	{
-		i = 0;
-		while (node->content[i])
-		{
-			length++;
-			i++;
-		}
-		node = node->next;
+		free(node);
+		return (MALLOC_ERROR);
 	}
-	return (length);
+	i = -1;
+	while (stash[++i])
+		node->content[i] = stash[i];
+	node->next = NULL;
+	*list = node;
+	return (ALRIGHT);
 }
