@@ -6,7 +6,7 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:26:00 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/05/01 20:06:00 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/05/02 13:25:03 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 */
 char	*get_next_line(int fd)
 {
-	static char	*save[1024] = {NULL};
+	static char	save[1024][BUFFER_SIZE];
 	t_list		*list;
 	char		*line;
 	int			case_init;
@@ -31,7 +31,7 @@ char	*get_next_line(int fd)
 		return (stash_to_string(save[fd]));
 	read_to_list(fd, &list);
 	line = list_to_string(&list);
-	save[fd] = list_to_stash(&list);
+	list_to_stash(&list, save[fd]);
 	empty_list(&list);
 	return (line);
 }
@@ -69,7 +69,6 @@ char	*list_to_string(t_list **list)
 {
 	t_list	*cursor;
 	char	*line;
-	int		i;
 
 	if (!list || !*list)
 		return (NULL);
@@ -90,15 +89,14 @@ char	*list_to_string(t_list **list)
 		pour le prochain appel à get_next_line().
 	Retourne NULL si rien à mettre en réserve.
 */
-char	*list_to_stash(t_list **list)
+void	list_to_stash(t_list **list, char *stash)
 {
 	int		i;
 	int		j;
-	char	stash[BUFFER_SIZE];
 	t_list	*cursor;
 
 	if (!list || !*list)
-		return (NULL);
+		return ;
 	cursor = *list;
 	while (cursor->next)
 		cursor = cursor->next;
@@ -106,14 +104,13 @@ char	*list_to_stash(t_list **list)
 	while (cursor->content[i] && cursor->content[i] != '\n')
 		i++;
 	if (!cursor->content[i])
-		return (NULL);
+		return ;
 	j = 0;
 	while (cursor->content[++i])
 		stash[j++] = cursor->content[i];
 	if (j == 0)
-		return (NULL);
+		return ;
 	stash[++j] = '\0';
-	return (stash);
 }
 
 /*

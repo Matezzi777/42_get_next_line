@@ -6,7 +6,7 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:26:07 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/05/01 20:06:10 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/05/02 13:19:43 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ typedef struct s_list
 char	*get_next_line(int fd);
 void	read_to_list(int fd, t_list **list);
 char	*list_to_string(t_list **list);
-char	*list_to_stash(t_list **list);
+void	list_to_stash(t_list **list, char *stash);
 void	empty_list(t_list **list);
 //get_next_line_utils.c
 int		add_to_list(int bytes_read, char *buffer, t_list **list);
