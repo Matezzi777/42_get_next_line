@@ -1,47 +1,45 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   test.c                                             :+:      :+:    :+:   */
+/*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/25 18:19:07 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/05/02 13:23:20 by maxmart2         ###   ########.fr       */
+/*   Created: 2025/05/15 16:42:53 by maxmart2          #+#    #+#             */
+/*   Updated: 2025/05/15 17:12:13 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
 #include <stdio.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include "get_next_line.h"
 
-#define FOREVER 1
+#define TRUE 1
 
 int	main(int argc, char **argv)
 {
+	int		i;
 	int		fd;
 	char	*line;
 
 	if (argc != 2)
 	{
-		printf("Wrong nb of arguments (1 needed).\n ==> Use : "
-			"./a.out <path_to_file>\n");
+		printf("Wrong number of arguments. (1 expected)\n"
+			"	Use : ./a.out <path_to_file>\n");
 		return (0);
 	}
 	fd = open(argv[1], O_RDONLY);
-	if (fd == -1)
-	{
-		printf("Unable to open %s.\n", argv[1]);
-		return (0);
-	}
-	while (FOREVER)
+	i = 1;
+	while (TRUE)
 	{
 		line = get_next_line(fd);
 		if (!line)
+		{
+			printf("End of file reached (%d lines read).\n", i - 1);
 			break ;
-		printf("%s", line);
+		}
+		printf("LINE %d : \"%s\"\n", i, line);
 		free(line);
+		i++;
 	}
-	close(fd);
-	return (0);
 }

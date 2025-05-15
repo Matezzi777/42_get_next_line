@@ -5,94 +5,104 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/13 16:26:00 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/05/15 07:01:53 by maxmart2         ###   ########.fr       */
+/*   Created: 2025/05/03 21:16:21 by maxmart2          #+#    #+#             */
+/*   Updated: 2025/05/15 17:12:09 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-/*
-	Fonction Principale
-*/
 char	*get_next_line(int fd)
 {
-	
+	static char	*stash;
+	char		*line;
+
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+		return (NULL);
+	stash = read_file(fd, stash);
+	if (!stash)
+		return (NULL);
+	line = ft_line_from_stash(stash);
+	stash = ft_prepare_next_call(stash);
+	return (line);
 }
 
-/*
-	Retourne la taille à allouer avec malloc.
-*/
-size_t	ft_strlen(char *str)
+char	*ft_join_and_free(char *stash, char *buffer)
 {
-	size_t	i;
+	char	*temp;
 
-	i = 0;
-	if (str[i])
-		while (str[i])
-			i++;
-	return (i);
+	temp = ft_strjoin(stash, buffer);
+	free(stash);
+	return (temp);
 }
 
-/*
-	Copie une string dans une autre et retourne la copie allouée.
-*/
-char	*ft_strdup(char	*str)
+char	*ft_prepare_next_call(char *buffer)
 {
 	int		i;
-	int		len;
-	char	*copy;
+	int		j;
+	char	*line;
 
-	if (!str)
-		return (NULL);
-	len = ft_strlen(str);
-	copy = (char *)malloc((len + 1) * sizeof(char));
-	if (!copy)
-		return (NULL);
 	i = 0;
-	while (str[i])
+	while (buffer[i] && buffer[i] != '\n')
+		i++;
+	if (!buffer[i])
 	{
-		copy[i] = str[i];
+		free(buffer);
+		return (NULL);
+	}
+	line = ft_calloc((ft_strlen(buffer) - i + 1), sizeof(char));
+	i++;
+	j = 0;
+	while (buffer[i])
+		line[j++] = buffer[i++];
+	free(buffer);
+	return (line);
+}
+
+char	*ft_line_from_stash(char *buffer)
+{
+	char	*line;
+	int		i;
+
+	i = 0;
+	if (!buffer[i])
+		return (NULL);
+	while (buffer[i] && buffer[i] != '\n')
+		i++;
+	line = ft_calloc(i + 2, sizeof(char));
+	i = 0;
+	while (buffer[i] && buffer[i] != '\n')
+	{
+		line[i] = buffer[i];
 		i++;
 	}
-	copy[i] = '\0';
-	return (copy);
+	if (buffer[i] && buffer[i] == '\n')
+		line[i++] = '\n';
+	return (line);
 }
 
-/*
-	Concatène tmp et buff puis retourne la nouvelle chaîne.
-*/
-
-/*
-	Libère tmp et buff et retourne la ligne si un '\n' est trouvé.
-	Sinon retourne NULL.
-*/
-
-/*
-	Extrait la partie après le saut de ligne dans tmp et retourne cette nouvelle partie.
-*/
-char	*ft_substr(char *str, unsigned int start, size_t len)
+char	*read_file(int fd, char *stash)
 {
-	int		i;
-	char	*sub;
+	char	*buffer;
+	int		byte_read;
 
-	if (!str || start <= ft_strlen(str))
+	if (!stash)
+		stash = ft_calloc(1, 1);
+	buffer = ft_calloc(BUFFER_SIZE + 1, sizeof(char));
+	byte_read = 1;
+	while (byte_read > 0)
 	{
-		sub = (char *)malloc(1 * sizeof(char));
-		if (!sub)
+		byte_read = read(fd, buffer, BUFFER_SIZE);
+		if (byte_read == -1)
+		{
+			free(buffer);
 			return (NULL);
-		sub[0] = '\0';
-		return (sub);
+		}
+		buffer[byte_read] = 0;
+		stash = ft_join_and_free(stash, buffer);
+		if (ft_strchr(buffer, '\n'))
+			break ;
 	}
-	sub = (char *)malloc((len + 1) * sizeof(char));
-	if (!sub)
-		return (NULL);
-	i = 0;
-	while (str[start + i] && i < len)
-	{
-		sub[i] = str[start + i];
-		i++;
-	}
-	sub[i] = '\0';
-	return (sub);
+	free(buffer);
+	return (stash);
 }
