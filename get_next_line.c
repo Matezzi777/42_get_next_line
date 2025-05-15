@@ -6,130 +6,93 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/13 16:26:00 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/05/02 13:25:03 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/05/15 07:01:53 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
 /*
-	Fonction principale
+	Fonction Principale
 */
 char	*get_next_line(int fd)
 {
-	static char	save[1024][BUFFER_SIZE];
-	t_list		*list;
-	char		*line;
-	int			case_init;
-
-	if (fd < 0 || fd >= 1024 || BUFFER_SIZE < 1 || read(fd, NULL, 0))
-		return (NULL);
-	case_init = stash_to_list(save[fd], &list);
-	if (case_init == MALLOC_ERROR)
-		return (NULL);
-	if (case_init == ALREADY_CONTAINED)
-		return (stash_to_string(save[fd]));
-	read_to_list(fd, &list);
-	line = list_to_string(&list);
-	list_to_stash(&list, save[fd]);
-	empty_list(&list);
-	return (line);
+	
 }
 
 /*
-	Lis le fd et remplis la liste d'attente.
+	Retourne la taille à allouer avec malloc.
 */
-void	read_to_list(int fd, t_list **list)
+size_t	ft_strlen(char *str)
 {
-	int		bytes_read;
-	char	buffer[BUFFER_SIZE + 1];
-	int		i;
+	size_t	i;
 
-	while (TRUE)
-	{
-		bytes_read = read(fd, buffer, BUFFER_SIZE);
-		if (bytes_read == 0)
-			return ;
-		if (!add_to_list(bytes_read, buffer, list))
-			return ;
-		if (bytes_read < BUFFER_SIZE)
-			return ;
-		i = -1;
-		while (++i < BUFFER_SIZE)
-			if (buffer[i] == '\n')
-				return ;
-	}
-}
-
-/*
-	Convertit la ligne depuis le contenu de la liste d'attente et la retourne.
-	Si la liste d'attente est vide, ou qu'une erreur arrive retourne NULL.
-*/
-char	*list_to_string(t_list **list)
-{
-	t_list	*cursor;
-	char	*line;
-
-	if (!list || !*list)
-		return (NULL);
-	line = NULL;
-	cursor = *list;
-	while (cursor)
-	{
-		line = cat_and_free(line, cursor->content);
-		if (!line)
-			return (NULL);
-		cursor = cursor->next;
-	}
-	return (clean_line(line));
-}
-
-/*
-	Retourne les caractères à mettre en réserve
-		pour le prochain appel à get_next_line().
-	Retourne NULL si rien à mettre en réserve.
-*/
-void	list_to_stash(t_list **list, char *stash)
-{
-	int		i;
-	int		j;
-	t_list	*cursor;
-
-	if (!list || !*list)
-		return ;
-	cursor = *list;
-	while (cursor->next)
-		cursor = cursor->next;
 	i = 0;
-	while (cursor->content[i] && cursor->content[i] != '\n')
-		i++;
-	if (!cursor->content[i])
-		return ;
-	j = 0;
-	while (cursor->content[++i])
-		stash[j++] = cursor->content[i];
-	if (j == 0)
-		return ;
-	stash[++j] = '\0';
+	if (str[i])
+		while (str[i])
+			i++;
+	return (i);
 }
 
 /*
-	Libère la mémoire allouée pour la liste d'attente.
+	Copie une string dans une autre et retourne la copie allouée.
 */
-void	empty_list(t_list **list)
+char	*ft_strdup(char	*str)
 {
-	t_list	*cursor;
-	t_list	*next;
+	int		i;
+	int		len;
+	char	*copy;
 
-	if (!list || !*list)
-		return ;
-	cursor = *list;
-	while (cursor)
+	if (!str)
+		return (NULL);
+	len = ft_strlen(str);
+	copy = (char *)malloc((len + 1) * sizeof(char));
+	if (!copy)
+		return (NULL);
+	i = 0;
+	while (str[i])
 	{
-		if (cursor->content)
-			free(cursor->content);
-		next = cursor->next;
-		free(cursor);
-		cursor = next;
+		copy[i] = str[i];
+		i++;
 	}
+	copy[i] = '\0';
+	return (copy);
+}
+
+/*
+	Concatène tmp et buff puis retourne la nouvelle chaîne.
+*/
+
+/*
+	Libère tmp et buff et retourne la ligne si un '\n' est trouvé.
+	Sinon retourne NULL.
+*/
+
+/*
+	Extrait la partie après le saut de ligne dans tmp et retourne cette nouvelle partie.
+*/
+char	*ft_substr(char *str, unsigned int start, size_t len)
+{
+	int		i;
+	char	*sub;
+
+	if (!str || start <= ft_strlen(str))
+	{
+		sub = (char *)malloc(1 * sizeof(char));
+		if (!sub)
+			return (NULL);
+		sub[0] = '\0';
+		return (sub);
+	}
+	sub = (char *)malloc((len + 1) * sizeof(char));
+	if (!sub)
+		return (NULL);
+	i = 0;
+	while (str[start + i] && i < len)
+	{
+		sub[i] = str[start + i];
+		i++;
+	}
+	sub[i] = '\0';
+	return (sub);
 }
