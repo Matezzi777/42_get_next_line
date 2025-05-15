@@ -6,7 +6,7 @@
 /*   By: maxmart2 <maxmart2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/03 21:16:21 by maxmart2          #+#    #+#             */
-/*   Updated: 2025/05/15 17:12:09 by maxmart2         ###   ########.fr       */
+/*   Updated: 2025/05/15 17:17:37 by maxmart2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,16 +14,16 @@
 
 char	*get_next_line(int fd)
 {
-	static char	*stash;
+	static char	*stash[1024];
 	char		*line;
 
 	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
 		return (NULL);
-	stash = read_file(fd, stash);
-	if (!stash)
+	stash[fd] = read_file(fd, stash[fd]);
+	if (!stash[fd])
 		return (NULL);
-	line = ft_line_from_stash(stash);
-	stash = ft_prepare_next_call(stash);
+	line = ft_line_from_stash(stash[fd]);
+	stash[fd] = ft_prepare_next_call(stash[fd]);
 	return (line);
 }
 
